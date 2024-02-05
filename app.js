@@ -12,6 +12,8 @@ function addTask() {
     let span = document.createElement("span");
     span.innerHTML = "\u00d7";
     li.appendChild(span);
+
+    saveDataToAPI(inputBox.value);
   }
   inputBox.value = "";
   saveData();
@@ -38,4 +40,48 @@ function saveData() {
 function showList() {
   listContainer.innerHTML = localStorage.getItem("data");
 }
-showList();
+
+function fetchDataFromAPI() {
+  fetch("https://jsonplaceholder.typicode.com/todos");
+  .then((response) => response.json())
+    .then((data) => {
+      data.forEach((todo) => {
+        let li = document.createElement("li");
+        li.innerHTML = todo.title;
+        listContainer.appendChild(li);
+
+        let span = document.createElement("span");
+        span.innerHTML = "\u00d7";
+        li.appendChild(span);
+      });
+    })
+    .catch((error) => {
+      console.error("Błąd pobierania danych", error);
+    });
+}
+
+function saveDataToAPI(task) {
+  fetch("https://jsonplaceholder.typicode.com/todos", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId: 1,
+      title: task,
+      completed: false,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Zapisano zadanie do API:", data);
+    })
+    .catch((error) => {
+      console.error("Błąd zapisywania danych do API:", error);
+    });
+}
+
+window.onload = function () {
+  fetchDataFromAPI();
+  showList();
+};
